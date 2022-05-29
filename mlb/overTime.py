@@ -26,7 +26,7 @@ def getInningTimeStamps(pitching):
     return outChanges, inningChanges
 
 
-def runsOverGame(teamName1, teamName2, date, battingStats=[], pitchingStats=[], xLabel=None, yLabel=None, title=None, legendLocation='lower right'):
+def runsOverGame(teamName1, teamName2, date, battingStats=[], pitchingStats=[], xLabel=None, yLabel=None, title=None, legendLocation='lower right', markerLine=None):
 
     cols = ['id', 'primary', 'name', 'display_code']
     teams = {
@@ -67,50 +67,54 @@ def runsOverGame(teamName1, teamName2, date, battingStats=[], pitchingStats=[], 
     print('potential battingStats:', homeBatting.columns)
     print('potential pitchingStats:', homePitching.columns)
 
-    dfs = []
-
-    if 'runs' in battingStats:
-        plays = getScoringPlays(statsGame['game_id'])
-        points = [{
-            'timeStamp': statsGame['game_datetime'],
-            'home': 0,
-            'away': 0
-        }]
-        points.extend([{
-            'timeStamp': play['about']['endTime'],
-            'home': play['result']['homeScore'],
-            'away': play['result']['awayScore'],
-            'home Label': f"{play['result']['description'].split(' ')[1]}" if play['about']['halfInning'] == 'bottom' else None,
-            'away Label': f"{play['result']['description'].split(' ')[1]}" if play['about']['halfInning'] == 'top' else None,
-        } for play in plays['plays']])
-
-        points = pd.DataFrame(points)
-
-        points = points.set_index('timeStamp')
-        points.index = pd.to_datetime(
-            points.index).tz_convert('US/Eastern')
-
-        endOfGame = {
-            'home': points['home'][-1],
-            'away': points['away'][-1]
-        }
-        points.loc[homeBatting.index[-1]] = [endOfGame.get(col, None) for col in points.columns]
-
-        awayPitchingChanges = getPitchingChanges(awayPitching)[['pitcherCount']].rename(columns={'pitcherCount': 'home pitchersFaced'})
-        homePitchingChanges = getPitchingChanges(homePitching)[['pitcherCount']].rename(columns={'pitcherCount': 'away pitchersFaced'})
-
-        points = pd.concat((points, awayPitchingChanges, homePitchingChanges))
-        points = points.sort_index()
-        points['home'] = points['home'].fillna(method='ffill')
-        points['away'] = points['away'].fillna(method='ffill')
-
-        dfs.append(points)
-
-    if 'runs' in battingStats:
-        battingStats.remove('runs')
 
     homeDf = pd.DataFrame()
     awayDf = pd.DataFrame()
+
+    if 'runs' in battingStats:
+        plays = getScoringPlays(statsGame['game_id'])
+
+        homePoints = [{
+            'timeStamp': statsGame['game_datetime'],
+            'home runs': 0
+        }]
+
+        awayPoints = [{
+            'timeStamp': statsGame['game_datetime'],
+            'away runs': 0
+        }]
+
+        for play in plays['plays']:
+            if play['about']['halfInning'] == 'top':
+                awayPoints.append({
+                    'timeStamp': play['about']['endTime'],
+                    'away runs': play['result']['awayScore'],
+                    'away runs label': str(play['result']['description'].split(' ')[1])
+                })
+            else:
+                homePoints.append({
+                    'timeStamp': play['about']['endTime'],
+                    'home runs': play['result']['homeScore'],
+                    'home runs label': str(play['result']['description'].split(' ')[1])
+                })
+
+        homePoints = pd.DataFrame(homePoints)
+        awayPoints = pd.DataFrame(awayPoints)
+
+        homePoints = homePoints.set_index('timeStamp')
+        homePoints.index = pd.to_datetime(
+            homePoints.index).tz_convert('US/Eastern')
+
+        awayPoints = awayPoints.set_index('timeStamp')
+        awayPoints.index = pd.to_datetime(
+            awayPoints.index).tz_convert('US/Eastern')
+
+        homeDf = pd.concat((homeDf, homePoints))
+
+        awayDf = pd.concat((awayDf, awayPoints))
+
+    if 'runs' in battingStats:
+        battingStats.remove('runs')
 
     if len(battingStats) > 0:
         df = homeBatting[battingStats]
@@ -124,6 +128,18 @@ def runsOverGame(teamName1, teamName2, date, battingStats=[], pitchingStats=[], 
         awayDf = pd.concat((awayDf, df))
 
     if len(pitchingStats) > 0:
+        if 'pitcherCount' in pitchingStats:
+            homePitchingChanges = getPitchingChanges(awayPitching)[['pitcherCount']].rename(
+                columns={'pitcherCount': 'home pitchers faced'})
+            homeDf = pd.concat((homeDf, homePitchingChanges))
+
+            awayPitchingChanges = getPitchingChanges(homePitching)[['pitcherCount']].rename(
+                columns={'pitcherCount': 'away pitchers faced'})
+            awayDf = pd.concat((awayDf, awayPitchingChanges))
+
+            pitchingStats.remove('pitcherCount')
+
+
         df = homePitching[pitchingStats]
         renames = {col: f"home {col}" for col in df.columns}
         df = df.rename(columns=renames)
@@ -134,8 +150,8 @@ def runsOverGame(teamName1, teamName2, date, battingStats=[], pitchingStats=[], 
         df = df.rename(columns=renames)
         awayDf = pd.concat((awayDf, df))
 
-    homeDf = homeDf.sort_index().fillna(method="ffill")
-    awayDf = awayDf.sort_index().fillna(method="ffill")
+
+    dfs = []
 
     if len(homeDf) > 0:
         dfs.append(homeDf)
@@ -147,15 +163,27 @@ def runsOverGame(teamName1, teamName2, date, battingStats=[], pitchingStats=[], 
     cmap[teams['away']['display_code']] = teams['away']['primary']
 
     for i, df in enumerate(dfs):
+        df = df.sort_index()
+        df = df.loc[df.index >= startTime]
+        if markerLine:
+            cols = list(df.columns)
+            prefix = cols[0].split(' ')[0]
+            newOrder = [prefix + ' ' + markerLine]
+            for col in cols:
+                if col != newOrder[0]:
+                    newOrder.append(col)
+            df = df[newOrder]
         renamings = {}
         for col in df.columns:
+            if not (col.endswith('label') or col.endswith('pitchers faced')):
+                df[col] = df[col].fillna(method='ffill').fillna(0)
             newName = col.replace('homeRun', 'Home Run').replace('home', teams['home']['display_code']).replace(
                 'away', teams['away']['display_code'])
             newName = capitalize(newName)
             if col != newName:
                 renamings[col] = newName
         dfs[i] = df.rename(
-            columns=renamings).loc[df.index >= startTime]
+            columns=renamings)
 
     if date[0] == '0':
         date = date[1:]

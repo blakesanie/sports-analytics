@@ -1,7 +1,6 @@
 from overTime import runsOverGame
 from game import getPlayByPlay
-
-print(runsOverGame('Rockies', 'Nationals', '05/28/2022', battingStats=['runs', 'hits'], xLabel="Time (US/Eastern)", yLabel="Runs", title="Runs over Time", legendLocation='upper left'))
+print(runsOverGame('Giants', 'Reds', '05/29/2022', battingStats=['runs'], pitchingStats=['pitcherCount'], markerLine='runs', xLabel="Time (US/Eastern)", yLabel="Runs", title="Runs over Time", legendLocation='upper left'))
 
 # print(getPlayByPlay(661486))
 
