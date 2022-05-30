@@ -9,7 +9,7 @@ import re
 import datetime as datetime
 
 
-def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, legendLocation='lower right', innings=None, inningsMarkers=[], dateFormatStr='%-I:%M%p', league='mlb', lineThickness=4.0):
+def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, legendLocation='lower right', innings=None, inningsMarkers=[], dateFormatStr='%-I:%M%p', league='mlb', lineThickness=4.0, notes=[]):
 
     fig, axes = plt.subplots(1, 1)
     fig.set_figheight(5)
@@ -20,6 +20,7 @@ def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, legendLocation
         axes.xaxis.set_major_formatter(
             mdates.DateFormatter(dateFormatStr))
     elif league == 'nba':
+        axes.grid(axis='y', alpha=0.3)
         axes.xaxis.set_major_locator(FixedLocator([i * 60 for i in range(0, 49, 6)]))
 
         def strfdelta(x, fmt):
@@ -94,8 +95,11 @@ def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, legendLocation
                                         markersize=8, alpha=1, markeredgecolor=cmap.get(team, 'black'))
 
                 else:
+                    label = col
+                    if col.endswith("Runs") or col.endswith("Score"):
+                        label += f" (Final: {round(df[col].iloc[-1])})"
                     axes.step(df.index, df[col], cmap.get(team, 'black'), where='post',
-                              label=col, alpha=0.8, linewidth=lineThickness - colI * 2,
+                              label=label, alpha=0.8, linewidth=lineThickness - colI * 2,
                               ls='-' if colI == 0 else '--')
 
 
@@ -156,8 +160,17 @@ def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, legendLocation
 
     minY, maxY = axes.get_ylim()
     yRange = maxY - minY
+
+    minX, maxX = axes.get_xlim()
+
+    if notes is not None and len(notes) > 0:
+        axes.text(0, 0.98, '\n'.join(notes), ha='left', va='top', linespacing=1.8, transform=axes.transAxes)
+
     if league == 'mlb':
         plt.ylim(minY - yRange * 0.06, maxY)
+        axes.text(0.98, 0.99, '@blakesanie', ha='right', va='top', alpha=0.6, transform=axes.transAxes)
+    else:
+        axes.text(0.5, 0.98, '@blakesanie', ha='center', va='top', alpha=0.6, transform=axes.transAxes)
 
     plt.gca().set_yticks([tick for tick in plt.gca().get_yticks() if tick >=0])
     for txt in labels:
@@ -167,7 +180,7 @@ def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, legendLocation
         if not isinstance(innings, list):
             innings = innings.index
         for x in innings:
-            axes.axvline(x=x, c='black', ls='--', lw=0.7, alpha=0.16)
+            axes.axvline(x=x, c='black', ls='--', lw=1 if league == 'mlb' else 1.5, alpha=0.15)
 
     i = 0
     for x, txt in inningsMarkers:

@@ -10,7 +10,7 @@ if __name__ == '__main__':
     date = '2022-05-29'
     color = 'green'
     opponentColor = 'red'
-    stats = ['points', 'rebounds', 'assists']
+    stats = ['points', 'assists', 'rebounds']
     game = getGame(team=team, date=date)
     box = boxscore.BoxScore(game['GAME_ID']).game.get_dict()
 
@@ -47,10 +47,10 @@ if __name__ == '__main__':
         df['rebounds'] = df['reboundsDefensive'] + df['reboundsOffensive']
         dfs[i] = df
 
-        ax.scatter(*[df[stat] for stat in stats], marker='^', c=colors[i], s=10.0)
+        ax.scatter(*[df[stat] for stat in stats], marker='o', c=colors[i], s=10.0, label= box['homeTeam']['teamTricode'] if i == 0 else box['awayTeam']['teamTricode'])
         for row in df.to_dict(orient="records"):
-            annotations.append(ax.text(*[row[stat] for stat in stats], row['familyName'], size=6, zorder=1,
-                    color=colors[i], ha='center', va='bottom'))
+            annotations.append(ax.text(*[row[stat] for stat in stats], f"{row['familyName']}\n{', '.join([str(row[stat]) for stat in stats])}\n\n\n", size=6, zorder=1,
+                    color='black', ha='center', va='center'))
             # ax.annotate(row['familyName'], )
 
     minZ, maxZ = ax.get_zlim()
@@ -70,9 +70,12 @@ if __name__ == '__main__':
     ax.set_xlabel(stats[0])
     ax.set_ylabel(stats[1])
     ax.set_zlabel(stats[2])
-    plt.title(f"{game['MATCHUP']}, {formatDate(date)}\n{'-'.join(stats)}", y=1.03)
+    ax.invert_xaxis()
+    plt.title(f"{game['MATCHUP']}, {formatDate(date)}\n{' - '.join(stats)}", y=1.03, linespacing=1.8)
     # plt.tight_layout()
-    plt.subplots_adjust(left=-0.13, bottom=0.02, top=0.94, right=1)
+    plt.subplots_adjust(left=-0.13, bottom=0.02, top=0.93, right=1)
+    ax.text2D(0.99, 0.87, '@blakesanie', ha='right', va='top', alpha=0.6, transform=ax.transAxes)
+    ax.legend()
     plt.show()
     pass
 

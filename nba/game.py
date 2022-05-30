@@ -5,6 +5,7 @@ from teams import teams
 from mlb.plot import plotLines
 import numpy as np
 from datetime import datetime
+import itertools
 
 
 def getGame(date='2022-05-27', team='Celtics'):
@@ -105,6 +106,18 @@ def formatDate(date):
     day = int(date[-2])
     return f"{month}/{day}/{year}"
 
+def getScoringNotes(gameTeams, scoringData):
+    out = []
+    diff = scoringData[f"{gameTeams[0]} Score"] - scoringData[f"{gameTeams[1]} Score"]
+    team1Lead = diff.max()
+    team2Lead = -diff.min()
+    out.append(f"{gameTeams[0]} Max Lead: {team1Lead}")
+    out.append(f"{gameTeams[1]} Max Lead: {team2Lead}")
+    leadChanges = len(list(itertools.groupby(diff[diff != 0], lambda x: x > 0))) - 1
+    out.append(f"Total Lead Changes: {leadChanges}")
+    return out
+
+
 if __name__ == '__main__':
     team = 'Celtics'
     date = '2022-05-29'
@@ -116,6 +129,8 @@ if __name__ == '__main__':
     pbp = getPlayByPlay(game['GAME_ID'])
     allScoring, team1Scoring, team2Scoring = getScores(game, pbp)
 
+    notes = getScoringNotes(gameTeams, allScoring)
+
     formattedDate = formatDate(date)
 
     cmap={
@@ -123,12 +138,12 @@ if __name__ == '__main__':
         f"{gameTeams[1]}": color if gameTeams[1] == game['TEAM_ABBREVIATION'] else opponentColor
     }
 
-    plotLines([team1Scoring, team2Scoring], cmap=cmap, title=f"{game['MATCHUP']}, {formattedDate}, Points over Time", xLabel='Game Time Elapsed', yLabel='Points', league='nba',lineThickness=2, dateFormatStr="%S", legendLocation="upper left", innings=[0, 12*60, 24*60, 36*60, 48*60])
+    plotLines([team1Scoring, team2Scoring], cmap=cmap, title=f"{game['MATCHUP']}, {formattedDate}, Points over Time", xLabel='Game Time Elapsed', yLabel='Points', league='nba',lineThickness=2, dateFormatStr="%S", legendLocation="lower right", innings=[0, 12*60, 24*60, 36*60, 48*60], notes=notes)
 
     team1Scoring = convertScoringToRate(team1Scoring)
     team2Scoring = convertScoringToRate(team2Scoring)
 
     plotLines([team1Scoring, team2Scoring], cmap=cmap,
               title=f"{game['MATCHUP']}, {formattedDate}, Scoring Rates over Time", xLabel='Game Time Elapsed',
-              yLabel='Points / Minute (over 5 Minutes)', league='nba', lineThickness=2, dateFormatStr="%S", legendLocation="upper left",
+              yLabel='Points / Minute (over 5 Minutes)', league='nba', lineThickness=2, dateFormatStr="%S", legendLocation="lower center",
               innings=[0, 12 * 60, 24 * 60, 36 * 60, 48 * 60])
