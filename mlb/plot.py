@@ -49,47 +49,104 @@ def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, legendLocation
 
     labels = []
 
-    newPitcherMarkerMade = False
-    for df in dfs:
-        cols = list(df.columns)
-        textOffsetX = (df.index[-1] - df.index[0]) * 0.018
-        numLines = 0
-        for col in cols:
-            team = col.split(' ')[0]
-            opponent = team2 if team == team1 else team1
-            if col.endswith('Label'):
-                # axes.text()
-                for i in range(len(df[col])):
-                    if df[col][i] and not pd.isnull(df[col][i]):
-                        print('axis text', df[col][i])
-                        colWithoutLabel = col.replace(
-                            ' Label', '')
-                        txt = axes.text(df.index[i], df[colWithoutLabel][i], df[col][i], ha='right', va='bottom', fontsize=9)  # backgroundcolor='#ffffffc0'
+    markersDrawn = set([])
 
-                        txt.set_path_effects([path_effects.Stroke(linewidth=2, foreground='white'),
-                                              path_effects.Normal()])
+    for colI in range(1000):
+        numDfsParsed = 0
+        for df in dfs:
+            cols = df.columns
+            if colI < len(cols):
+                numDfsParsed += 1
+                col = cols[colI]
+                team = col.split(' ')[0]
+                if col.endswith('Label'):
+                    # axes.text()
+                    for i in range(len(df[col])):
+                        if df[col][i] and not pd.isnull(df[col][i]):
+                            print('axis text', df[col][i])
+                            colWithoutLabel = col.replace(
+                                ' Label', '')
+                            txt = axes.text(df.index[i], df[colWithoutLabel][i], df[col][i], ha='right', va='bottom',
+                                            fontsize=9)  # backgroundcolor='#ffffffc0'
 
-                        labels.append(txt)
-            elif col.endswith('Pitchers Faced'):
-                if not newPitcherMarkerMade:
-                    axes.plot([], [], marker='o', c='black', label='New Pitcher', ls='none', alpha=0.2, markersize=5)
-                    newPitcherMarkerMade = True
-                pitchingChanges = df[df[col].notnull()]
-                markers = axes.plot(pitchingChanges.index, pitchingChanges[cols[0]], marker='o', c=reversecmap.get(team, 'black'), ls='none', markersize=5, alpha=0.8)
-                for marker in markers:
-                    marker.set_path_effects([path_effects.Stroke(linewidth=4, foreground='white'),
-                                      path_effects.Normal()])
-            elif col.endswith('Timeout'):
-                if not newPitcherMarkerMade:
-                    axes.plot([], [], marker='o', c='white', label='Timeout', ls='none', alpha=1, markersize=8, markeredgecolor='black')
-                    newPitcherMarkerMade = True
-                timeouts = df[df[col].notnull()]
-                markers = axes.plot(timeouts.index, timeouts[cols[0]], marker='o', c='white', ls='none', markersize=8, alpha=1, markeredgecolor=cmap.get(team, 'black'))
+                            txt.set_path_effects([path_effects.Stroke(linewidth=2, foreground='white'),
+                                                  path_effects.Normal()])
 
-            else:
-                axes.step(df.index, df[col], cmap.get(team, 'black'), where='post',
-                          label=col, alpha=0.8, linewidth=lineThickness - numLines * 2, ls='-' if numLines == 0 else '--')
-                numLines += 1
+                            labels.append(txt)
+                elif col.endswith('Pitchers Faced'):
+                    if 'Pitchers Faced' not in markersDrawn:
+                        axes.plot([], [], marker='o', c='black', label='New Pitcher', ls='none', alpha=0.2,
+                                  markersize=5)
+                        markersDrawn.add('Pitchers Faced')
+                    pitchingChanges = df[df[col].notnull()]
+                    markers = axes.plot(pitchingChanges.index, pitchingChanges[cols[0]], marker='o',
+                                        c=reversecmap.get(team, 'black'), ls='none', markersize=5, alpha=0.8)
+                    for marker in markers:
+                        marker.set_path_effects([path_effects.Stroke(linewidth=4, foreground='white'),
+                                                 path_effects.Normal()])
+                elif col.endswith('Timeout'):
+                    if 'Timeout' not in markersDrawn:
+                        axes.plot([], [], marker='o', c='white', label='Timeout', ls='none', alpha=1, markersize=8,
+                                  markeredgecolor='black')
+                        markersDrawn.add('Timeout')
+                    timeouts = df[df[col].notnull()]
+                    markers = axes.plot(timeouts.index, timeouts[cols[0]], marker='o', c='white', ls='none',
+                                        markersize=8, alpha=1, markeredgecolor=cmap.get(team, 'black'))
+
+                else:
+                    axes.step(df.index, df[col], cmap.get(team, 'black'), where='post',
+                              label=col, alpha=0.8, linewidth=lineThickness - colI * 2,
+                              ls='-' if colI == 0 else '--')
+
+
+
+        if numDfsParsed == 0:
+            break
+
+
+
+    #
+    # newPitcherMarkerMade = False
+    # for df in dfs:
+    #     cols = list(df.columns)
+    #     textOffsetX = (df.index[-1] - df.index[0]) * 0.018
+    #     numLines = 0
+    #     for col in cols:
+    #         team = col.split(' ')[0]
+    #         opponent = team2 if team == team1 else team1
+    #         if col.endswith('Label'):
+    #             # axes.text()
+    #             for i in range(len(df[col])):
+    #                 if df[col][i] and not pd.isnull(df[col][i]):
+    #                     print('axis text', df[col][i])
+    #                     colWithoutLabel = col.replace(
+    #                         ' Label', '')
+    #                     txt = axes.text(df.index[i], df[colWithoutLabel][i], df[col][i], ha='right', va='bottom', fontsize=9)  # backgroundcolor='#ffffffc0'
+    #
+    #                     txt.set_path_effects([path_effects.Stroke(linewidth=2, foreground='white'),
+    #                                           path_effects.Normal()])
+    #
+    #                     labels.append(txt)
+    #         elif col.endswith('Pitchers Faced'):
+    #             if not newPitcherMarkerMade:
+    #                 axes.plot([], [], marker='o', c='black', label='New Pitcher', ls='none', alpha=0.2, markersize=5)
+    #                 newPitcherMarkerMade = True
+    #             pitchingChanges = df[df[col].notnull()]
+    #             markers = axes.plot(pitchingChanges.index, pitchingChanges[cols[0]], marker='o', c=reversecmap.get(team, 'black'), ls='none', markersize=5, alpha=0.8)
+    #             for marker in markers:
+    #                 marker.set_path_effects([path_effects.Stroke(linewidth=4, foreground='white'),
+    #                                   path_effects.Normal()])
+    #         elif col.endswith('Timeout'):
+    #             if not newPitcherMarkerMade:
+    #                 axes.plot([], [], marker='o', c='white', label='Timeout', ls='none', alpha=1, markersize=8, markeredgecolor='black')
+    #                 newPitcherMarkerMade = True
+    #             timeouts = df[df[col].notnull()]
+    #             markers = axes.plot(timeouts.index, timeouts[cols[0]], marker='o', c='white', ls='none', markersize=8, alpha=1, markeredgecolor=cmap.get(team, 'black'))
+    #
+    #         else:
+    #             axes.step(df.index, df[col], cmap.get(team, 'black'), where='post',
+    #                       label=col, alpha=0.8, linewidth=lineThickness - numLines * 2, ls='-' if numLines == 0 else '--')
+    #             numLines += 1
     if xLabel:
         axes.set_xlabel(xLabel)
     if yLabel:

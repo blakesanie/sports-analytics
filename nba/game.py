@@ -3,6 +3,7 @@ from nba_api.stats.endpoints import leaguegamefinder
 from nba_api.stats.endpoints import playbyplayv2
 from teams import teams
 from mlb.plot import plotLines
+import numpy as np
 from datetime import datetime
 
 
@@ -47,6 +48,21 @@ def getTimouts(pbp):
 
     return pd.concat((homeTimeouts, visitorTimeouts))
 
+def convertScoringToRate(df):
+    df = df.merge(pd.DataFrame(index=np.arange(60 * 48), data=None), how='outer', left_index=True,
+                                      right_index=True)
+    df[df.columns[0]] = df[df.columns[0]].fillna(method='ffill')
+    original = df.copy()
+    minutes = 5
+    df[df.columns[0]] = df[df.columns[0]].diff(periods=minutes * 60) / minutes
+    df[df.columns[0]][:minutes*60] = original[df.columns[0]][:minutes*60] / (np.arange(minutes*60) / 60)
+    df[df.columns[0]] = df[df.columns[0]].rolling(30).mean()
+    df = df.rename(columns={
+        f"{df.columns[0]}": df.columns[0].split(' ')[0] + ' Scoring Rate'
+    })
+
+    return df
+
 def getScores(game, pbp):
     out = pbp.loc[(pbp['SCORE'].notnull()) | (pbp["EVENTMSGTYPE"] == 12)]
     out['SCORE'] = out['SCORE'].fillna('0 - 0')
@@ -83,22 +99,36 @@ def getScores(game, pbp):
 
     return out, out[[col for col in out.columns if col.startswith(team1)]], out[[col for col in out.columns if col.startswith(team2)]]
 
+def formatDate(date):
+    year = date[:4]
+    month = int(date[5:7])
+    day = int(date[-2])
+    return f"{month}/{day}/{year}"
+
 if __name__ == '__main__':
-    team = 'Warriors'
-    date = '2022-05-26'
-    color = 'blue'
-    opponentColor = 'grey'
+    team = 'Celtics'
+    date = '2022-05-29'
+    color = 'green'
+    opponentColor = 'red'
     game = getGame(team=team, date=date)
     gameTeams = list(getTeamsFromGame(game))
     print(game)
     pbp = getPlayByPlay(game['GAME_ID'])
     allScoring, team1Scoring, team2Scoring = getScores(game, pbp)
 
-    year = date[:4]
-    month = int(date[5:7])
-    day = int(date[-2])
+    formattedDate = formatDate(date)
 
-    plotLines([team1Scoring, team2Scoring], title=f"{game['MATCHUP']}, {month}/{day}/{year}, Points over Time", xLabel='Game Time Elasped', yLabel='Points', league='nba',lineThickness=2, dateFormatStr="%S", legendLocation="upper left", cmap={
+    cmap={
         f"{gameTeams[0]}": color if gameTeams[0] == game['TEAM_ABBREVIATION'] else opponentColor,
         f"{gameTeams[1]}": color if gameTeams[1] == game['TEAM_ABBREVIATION'] else opponentColor
-    }, innings=[0, 12*60, 24*60, 36*60, 48*60])
+    }
+
+    plotLines([team1Scoring, team2Scoring], cmap=cmap, title=f"{game['MATCHUP']}, {formattedDate}, Points over Time", xLabel='Game Time Elapsed', yLabel='Points', league='nba',lineThickness=2, dateFormatStr="%S", legendLocation="upper left", innings=[0, 12*60, 24*60, 36*60, 48*60])
+
+    team1Scoring = convertScoringToRate(team1Scoring)
+    team2Scoring = convertScoringToRate(team2Scoring)
+
+    plotLines([team1Scoring, team2Scoring], cmap=cmap,
+              title=f"{game['MATCHUP']}, {formattedDate}, Scoring Rates over Time", xLabel='Game Time Elapsed',
+              yLabel='Points / Minute (over 5 Minutes)', league='nba', lineThickness=2, dateFormatStr="%S", legendLocation="upper left",
+              innings=[0, 12 * 60, 24 * 60, 36 * 60, 48 * 60])
