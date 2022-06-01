@@ -238,6 +238,11 @@ def runsOverGame(teamName1, teamName2, date, game=None, pbp=None, gameIndex=0, b
     winningScore = max(statsGame['away_score'], statsGame['home_score'])
     losingScore = min(statsGame['away_score'], statsGame['home_score'])
 
-    message = f"{winningHandle} ({winningScore}) > {losingHandle} ({losingScore}){doubleHeader}, {month}/{day}/{year} | {statsGame['venue_name']} {winningHashTags} {losingHashTags}"
+    if isWalkOff:
+        starter = 'Walk off! 💥'
+    else:
+        starter = ["Just now:", "Final:", "This just in:", "Moments ago:", "Final score:"]
+
+    message = f"{starter} {winningHandle} ({winningScore}) > {losingHandle} ({losingScore}){doubleHeader}, {month}/{day}/{year} | {statsGame['venue_name']} {winningHashTags} {losingHashTags}"
 
     return filename, message
