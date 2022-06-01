@@ -59,5 +59,7 @@ for game, pbp in gameData:
     print(filename)
     postTweetWithFilenames(message, [filename])
 
+print('posted', len(gameData), 'games')
+
 with open('history.txt', 'w') as f:
     f.write(todaysDate + '\n' + '\n'.join((processedGames + list(notProcessed['game_id'].astype(str)))))
