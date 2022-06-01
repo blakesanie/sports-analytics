@@ -1,0 +1,5 @@
+pandas==1.4.2
+MLB-StatsAPI==1.4.2
+mlbgame==2.5.0
+tqdm==4.62.3
+matplotlib==3.3.2

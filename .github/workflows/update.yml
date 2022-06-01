@@ -1,0 +1,32 @@
+name: Process MLB Games
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      TWITTER_BEARER_TOKEN: ${{ secrets.TWITTER_BEARER_TOKEN }}
+      TWITTER_V1_API_KEY: ${{ secrets.TWITTER_V1_API_KEY }}
+      TWITTER_V1_API_KEY_SECRET: ${{ secrets.TWITTER_V1_API_KEY_SECRET }}
+      TWITTER_V1_ACCESS_TOKEN: ${{ secrets.TWITTER_V1_ACCESS_TOKEN }}
+      TWITTER_V1_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_V1_ACCESS_TOKEN_SECRET }}
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v2
+      - name: Install Python
+        uses: actions/setup-python@v2
+      - name: Enter MLB dir
+        run: cd mlb
+      - name: Install Python Dependencies
+        run: |
+          pip install -r requirements.txt
+      - name: process new games
+        run: python automated.py
+      - name: Commit and push if changed
+        run: |
+          git config --global user.name 'Blake Sanie'
+          git config --global user.email 'blakesanie@users.noreply.github.com'
+          git commit -am "Automated update" || true
+          git push || true

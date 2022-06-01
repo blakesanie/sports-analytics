@@ -9,7 +9,7 @@ import re
 import datetime as datetime
 
 
-def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, legendLocation='lower right', innings=None, inningsMarkers=[], dateFormatStr='%-I:%M%p', league='mlb', lineThickness=4.0, notes=[]):
+def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, amap={}, legendLocation='lower right', innings=None, inningsMarkers=[], dateFormatStr='%-I:%M%p', league='mlb', lineThickness=4.0, notes=[], legendCoords=None, twitterLocation=None):
 
     fig, axes = plt.subplots(1, 1)
     fig.set_figheight(5)
@@ -52,6 +52,10 @@ def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, legendLocation
 
     markersDrawn = set([])
 
+    seriesMax = -float('inf')
+    seriesMaxX = None
+    seriesMaxTeam = None
+
     for colI in range(1000):
         numDfsParsed = 0
         for df in dfs:
@@ -60,6 +64,9 @@ def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, legendLocation
                 numDfsParsed += 1
                 col = cols[colI]
                 team = col.split(' ')[0]
+                opponent = list(cmap.keys())
+                opponent.remove(team)
+                opponent = opponent[0]
                 if col.endswith('Label'):
                     # axes.text()
                     for i in range(len(df[col])):
@@ -67,13 +74,20 @@ def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, legendLocation
                             print('axis text', df[col][i])
                             colWithoutLabel = col.replace(
                                 ' Label', '')
-                            txt = axes.text(df.index[i], df[colWithoutLabel][i], df[col][i], ha='right', va='bottom',
-                                            fontsize=9)  # backgroundcolor='#ffffffc0'
+                            txt = axes.text(df.index[i], df[colWithoutLabel][i], df[col][i] + ' ', ha='right', va='center',
+                                            fontsize=8)  # backgroundcolor='#ffffffc0'
 
                             txt.set_path_effects([path_effects.Stroke(linewidth=2, foreground='white'),
                                                   path_effects.Normal()])
 
-                            labels.append(txt)
+                            # for _ in range(3):
+                            #     transf = axes.transData.inverted()
+                            #     bbox = txt.get_window_extent(renderer=fig.canvas.get_renderer())
+                            #     bbox = bbox.transformed(transf)
+                            #     axes.plot([bbox.x0, bbox.x0, bbox.x1, bbox.x1, bbox.x0],
+                            #              [bbox.y0, bbox.y1, bbox.y1, bbox.y0, bbox.y0])
+
+                            labels.append((team, txt))
                 elif col.endswith('Pitchers Faced'):
                     if 'Pitchers Faced' not in markersDrawn:
                         axes.plot([], [], marker='o', c='black', label='New Pitcher', ls='none', alpha=0.2,
@@ -81,7 +95,7 @@ def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, legendLocation
                         markersDrawn.add('Pitchers Faced')
                     pitchingChanges = df[df[col].notnull()]
                     markers = axes.plot(pitchingChanges.index, pitchingChanges[cols[0]], marker='o',
-                                        c=reversecmap.get(team, 'black'), ls='none', markersize=5, alpha=0.8)
+                                        c=reversecmap.get(team, 'black'), ls='none', markersize=lineThickness, alpha=amap.get(opponent, 1) * 0.8)
                     for marker in markers:
                         marker.set_path_effects([path_effects.Stroke(linewidth=4, foreground='white'),
                                                  path_effects.Normal()])
@@ -97,10 +111,19 @@ def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, legendLocation
                 else:
                     label = col
                     if col.endswith("Runs") or col.endswith("Score"):
-                        label += f" (Final: {round(df[col].iloc[-1])})"
-                    axes.step(df.index, df[col], cmap.get(team, 'black'), where='post',
-                              label=label, alpha=0.8, linewidth=lineThickness - colI * 2,
+                        label += f" (F: {round(df[col].iloc[-1])})"
+                    for k in range(1):
+                        axes.step(df.index, df[col], cmap.get(team, 'black'), where='post',
+                              label=label if k == 0 else None, alpha=amap.get(team, 1) * 0.8, linewidth=lineThickness - colI * 2,
                               ls='-' if colI == 0 else '--')
+                        if league == 'mlb':
+                            changeMask = df[col].diff() != 0
+                            axes.plot(df.index[changeMask], df[col][changeMask], ls='none', c='none', marker='o', mfc='w', mec='none', ms=2)
+                        max = df[col].max()
+                        if max > seriesMax:
+                            seriesMax = max
+                            seriesMaxX = df.index[df[col].argmax()]
+                            seriesMaxTeam = team
 
 
 
@@ -162,19 +185,25 @@ def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, legendLocation
     yRange = maxY - minY
 
     minX, maxX = axes.get_xlim()
+    xRange = maxX - minX
+
+
 
     if notes is not None and len(notes) > 0:
         axes.text(0, 0.98, '\n'.join(notes), ha='left', va='top', linespacing=1.8, transform=axes.transAxes)
 
     if league == 'mlb':
         plt.ylim(minY - yRange * 0.06, maxY)
-        axes.text(0.98, 0.99, '@blakesanie', ha='right', va='top', alpha=0.6, transform=axes.transAxes)
+        axes.text(*((0.5, 1) if twitterLocation is None else twitterLocation), '@blakesanie', ha='center', va='top', alpha=0.6, transform=axes.transAxes, fontsize=6, bbox=dict(facecolor='white', alpha=1, edgecolor='none'))
+        for _ in range(10):
+            axes.plot([0.42, 0.58], [0.98, 0.98], transform=axes.transAxes, color='none')
+            axes.plot([seriesMaxX, df.index[-1]], [seriesMax + yRange * 0.02, seriesMax + yRange * 0.02], c='none')
     else:
         axes.text(0.5, 0.98, '@blakesanie', ha='center', va='top', alpha=0.6, transform=axes.transAxes)
 
     plt.gca().set_yticks([tick for tick in plt.gca().get_yticks() if tick >=0])
-    for txt in labels:
-        txt.set_y(txt._y + yRange * 0.005)
+    for team, txt in labels:
+        txt.set_y(txt._y + yRange * (-0.03 if team == seriesMaxTeam else 0.025))
 
     if innings is not None:
         if not isinstance(innings, list):
@@ -182,13 +211,16 @@ def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, legendLocation
         for x in innings:
             axes.axvline(x=x, c='black', ls='--', lw=1 if league == 'mlb' else 1.5, alpha=0.15)
 
+    for i in range(10):
+        axes.axhline(y=minY, color='none') # draw lines so the legend doesnt go here
+
     i = 0
     for x, txt in inningsMarkers:
         axes.text(x, minY - yRange * 0.02 + yRange * 0.003 * (1 if i % 2 == 0 else -1), txt, ha='center', va='top' if i % 2 == 1 else 'bottom', fontsize=7)
         i += 1
 
         # axes.text(x, y, text)
-    axes.legend(loc=legendLocation, prop={'size': 9})
+    axes.legend(loc=legendLocation, prop={'size': 8}, bbox_to_anchor=legendCoords)
     axes.spines['top'].set_visible(False)
     axes.spines['right'].set_visible(False)
     axes.spines['bottom'].set_visible(False)
@@ -197,3 +229,6 @@ def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, legendLocation
     # axes.tick_params(axis='x', which='major', top=15)
     # plt.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1)
     plt.show()
+    filename = f'./plots/{title.split(",")[0]}.png'
+    fig.savefig(filename)
+    return filename

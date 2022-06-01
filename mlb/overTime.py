@@ -1,10 +1,11 @@
 import pandas as pd
 from datetime import datetime, timezone
-from teams import getTeamCols
+from teams import getTeamColsByName
 from game import getGame, getScoringPlays, getPlayByPlay
 from plot import plotLines
 import pytz
 import re
+from color import color_similarity
 
 def camel_case_split(identifier):
     matches = re.finditer('.+?(?:(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|$)', identifier)
@@ -26,27 +27,32 @@ def getInningTimeStamps(pitching):
     return outChanges, inningChanges
 
 
-def runsOverGame(teamName1, teamName2, date, battingStats=[], pitchingStats=[], xLabel=None, yLabel=None, title=None, legendLocation='lower right', markerLine=None):
-
+def runsOverGame(teamName1, teamName2, date, game=None, pbp=None, battingStats=[], pitchingStats=[], xLabel=None, yLabel=None, title=None, legendLocation='lower right', markerLine=None, homeColor=None, awayColor=None, twitterLocation=None, legendCoords=None):
     cols = ['id', 'primary', 'name', 'display_code']
-    teams = {
-        'away': dict(zip(cols, getTeamCols(teamName1, columns=cols))),
-        'home': dict(zip(cols, getTeamCols(teamName2, columns=cols)))
-    }
-
-    statsGame = getGame(teams['away']['id'], teams['home']['id'], date)
+    if game is None:
+        teams = {
+            'away': dict(zip(cols, getTeamColsByName(teamName1, columns=cols))),
+            'home': dict(zip(cols, getTeamColsByName(teamName2, columns=cols)))
+        }
+        statsGame = getGame(teams['away']['id'], teams['home']['id'], date)
+        if statsGame['away_name'] != teams['away']['name']:
+            temp = teams['away']
+            teams['away'] = teams['home']
+            teams['home'] = temp
+    else:
+        teams = {
+            'away': dict(zip(cols, getTeamColsByName(game['away_name'], type='full', columns=cols))),
+            'home': dict(zip(cols, getTeamColsByName(game['home_name'], type='full', columns=cols)))
+        }
+        statsGame = game
 
     startTime = pd.DataFrame([{'startTime': statsGame['game_datetime']}]).set_index('startTime')
     startTime.index = pd.to_datetime(
         startTime.index).tz_convert('US/Eastern')
     startTime = startTime.index[0]
 
-    if statsGame['away_name'] != teams['away']['name']:
-        temp = teams['away']
-        teams['away'] = teams['home']
-        teams['home'] = temp
 
-    homePitching, awayPitching, homeBatting, awayBatting = getPlayByPlay(statsGame['game_id'])
+    homePitching, awayPitching, homeBatting, awayBatting = getPlayByPlay(statsGame['game_id']) if pbp is None else pbp
 
     awayOutChanges, awayInningChanges = getInningTimeStamps(homePitching)
     homeOutChanges, homeInningChanges = getInningTimeStamps(awayPitching)
@@ -159,9 +165,20 @@ def runsOverGame(teamName1, teamName2, date, battingStats=[], pitchingStats=[], 
         dfs.append(awayDf)
 
     cmap = {}
-    cmap[teams['home']['display_code']] = teams['home']['primary']
-    cmap[teams['away']['display_code']] = teams['away']['primary']
+    cmap[teams['home']['display_code']] = teams['home']['primary'] if homeColor is None else homeColor
+    cmap[teams['away']['display_code']] = teams['away']['primary'] if awayColor is None else awayColor
 
+    similarity, lightest = color_similarity(*list(cmap.values()))
+
+    amap={}
+
+    if similarity < 150:
+        for key, value in cmap.items():
+            if value == lightest:
+                amap[key] = 0.5 + similarity / 150 * 0.3
+                break
+
+    print(similarity, cmap)
     for i, df in enumerate(dfs):
         df = df.sort_index()
         df = df.loc[df.index >= startTime]
@@ -185,7 +202,11 @@ def runsOverGame(teamName1, teamName2, date, battingStats=[], pitchingStats=[], 
         dfs[i] = df.rename(
             columns=renamings)
 
-    if date[0] == '0':
-        date = date[1:]
+    gameDate = statsGame['game_date']
+    year = int(gameDate[:4])
+    month = int(gameDate[5:7])
+    day = int(gameDate[-2:])
 
-    return plotLines(dfs, xLabel='Time (US/Eastern)', yLabel='Runs', title=f"{teams['away']['display_code']} @ {teams['home']['display_code']}, {date}{f', {title}' if title else ''}", cmap=cmap, legendLocation=legendLocation, innings=innings, inningsMarkers=inningsMarkers)
+    filename = plotLines(dfs, xLabel=xLabel, yLabel=yLabel, title=f"{teams['away']['display_code']} @ {teams['home']['display_code']}, {month}/{day}/{year}{f', {title}' if title else ''}", cmap=cmap, amap=amap, legendLocation=legendLocation, innings=innings, inningsMarkers=inningsMarkers, legendCoords=legendCoords, twitterLocation=twitterLocation)
+    message = statsGame['summmary']
+    return filename, message

@@ -1,0 +1,31 @@
+id,name,teamName,locationName,shortName,division,league,primary,display_code
+133,Oakland Athletics,Athletics,Oakland,Oakland,West,American,#003831,OAK
+134,Pittsburgh Pirates,Pirates,Pittsburgh,Pittsburgh,Central,National,#000000,PIT
+135,San Diego Padres,Padres,San Diego,San Diego,West,National,#05143f,SD
+136,Seattle Mariners,Mariners,Seattle,Seattle,West,American,#0c2c56,SEA
+137,San Francisco Giants,Giants,San Francisco,San Francisco,West,National,#000000,SF
+138,St. Louis Cardinals,Cardinals,St. Louis,St. Louis,Central,National,#c41e3a,STL
+139,Tampa Bay Rays,Rays,St. Petersburg,Tampa Bay,East,American,#092c5c,TB
+140,Texas Rangers,Rangers,Arlington,Texas,West,American,#003278,TEX
+141,Toronto Blue Jays,Blue Jays,Toronto,Toronto,East,American,#003399,TOR
+142,Minnesota Twins,Twins,Minneapolis,Minnesota,Central,American,#042462,MIN
+143,Philadelphia Phillies,Phillies,Philadelphia,Philadelphia,East,National,#e81828,PHI
+144,Atlanta Braves,Braves,Atlanta,Atlanta,East,National,#0f437c,ATL
+145,Chicago White Sox,White Sox,Chicago,Chi White Sox,Central,American,#000000,CWS
+146,Miami Marlins,Marlins,Miami,Miami,East,National,#000000,MIA
+147,New York Yankees,Yankees,Bronx,NY Yankees,East,American,#132448,NYY
+158,Milwaukee Brewers,Brewers,Milwaukee,Milwaukee,Central,National,#0a2351,MIL
+108,Los Angeles Angels,Angels,Anaheim,LA Angels,West,American,#ba0021,LAA
+109,Arizona Diamondbacks,D-backs,Phoenix,Arizona,West,National,#a71930,ARI
+110,Baltimore Orioles,Orioles,Baltimore,Baltimore,East,American,#000000,BAL
+111,Boston Red Sox,Red Sox,Boston,Boston,East,American,#ba313c,BOS
+112,Chicago Cubs,Cubs,Chicago,Chi Cubs,Central,National,#0e3386,CHC
+113,Cincinnati Reds,Reds,Cincinnati,Cincinnati,Central,National,#c6011f,CIN
+114,Cleveland Guardians,Guardians,Cleveland,Cleveland,Central,American,#cc0000,CLE
+115,Colorado Rockies,Rockies,Denver,Colorado,West,National,#000000,COL
+116,Detroit Tigers,Tigers,Detroit,Detroit,Central,American,#003366,DET
+117,Houston Astros,Astros,Houston,Houston,West,American,#002D62,HOU
+118,Kansas City Royals,Royals,Kansas City,Kansas City,Central,American,#004687,KC
+119,Los Angeles Dodgers,Dodgers,Los Angeles,LA Dodgers,West,National,#083c6b,LAD
+120,Washington Nationals,Nationals,Washington,Washington,East,National,#11225b,WSH
+121,New York Mets,Mets,Flushing,NY Mets,East,National,#003581,NYM
