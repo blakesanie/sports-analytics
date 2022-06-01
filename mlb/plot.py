@@ -113,13 +113,13 @@ def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, amap={}, legen
                     label = col
                     if col.endswith("Runs") or col.endswith("Score"):
                         label += f" (F: {round(df[col].iloc[-1])})"
-                    for k in range(1):
-                        axes.step(df.index, df[col], cmap.get(team, 'black'), where='post',
+                    for k in range(10):
+                        axes.step(df.index, df[col], c=cmap.get(team, 'black') if k == 0 else 'none', where='post',
                               label=label if k == 0 else None, alpha=amap.get(team, 1) * 0.8, linewidth=lineThickness - colI * 2,
                               ls='-' if colI == 0 else '--')
                         if league == 'mlb':
                             changeMask = df[col].diff() != 0
-                            axes.plot(df.index[changeMask], df[col][changeMask], ls='none', c='none', marker='o', mfc='w', mec='none', ms=2)
+                            axes.plot(df.index[changeMask][1:], df[col][changeMask][1:], ls='none', c='none', marker='o', mfc='w', mec='none', ms=2)
                         max = df[col].max()
                         if max > seriesMax:
                             seriesMax = max

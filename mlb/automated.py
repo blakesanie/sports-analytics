@@ -25,6 +25,7 @@ tz = timezone('Pacific/Honolulu')
 todaysDate = datetime.now(tz).strftime('%Y-%m-%d')
 
 if storedDate is not None and storedDate != todaysDate:
+    print('it is a new day!')
     processedGames = []
 
 print('todaysDate', todaysDate)

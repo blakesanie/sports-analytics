@@ -28,7 +28,7 @@ def getInningTimeStamps(pitching):
 
 
 def runsOverGame(teamName1, teamName2, date, game=None, pbp=None, battingStats=[], pitchingStats=[], xLabel=None, yLabel=None, title=None, legendLocation='lower right', markerLine=None, homeColor=None, awayColor=None, twitterLocation=None, legendCoords=None):
-    cols = ['id', 'primary', 'name', 'display_code', 'shortName']
+    cols = ['id', 'primary', 'name', 'display_code', 'teamName']
     if game is None:
         teams = {
             'away': dict(zip(cols, getTeamColsByName(teamName1, columns=cols))),
@@ -92,10 +92,11 @@ def runsOverGame(teamName1, teamName2, date, game=None, pbp=None, battingStats=[
 
         for play in plays['plays']:
             capitalizedWordsEncountered = 0
-            for word in play['result']['description'].replace(teams['home']['shortName'], '').replace(teams['away']['shortName'], '').split(' '):
-                if word.title() == word:
+            for word in play['result']['description'].replace(teams['home']['teamName'], '').replace(teams['away']['teamName'], '').split(' '):
+                if len(word) > 0 and word[0] == word[0].upper():
                     if capitalizedWordsEncountered == 1:
-                        lastName = word
+                        regex = re.compile('[^a-zA-Z]')
+                        lastName = regex.sub('', word)
                         break
                     capitalizedWordsEncountered += 1
             if play['about']['halfInning'] == 'top':
