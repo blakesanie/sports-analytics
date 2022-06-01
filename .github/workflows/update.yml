@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  mlb:
     runs-on: ubuntu-latest
     env:
       TWITTER_BEARER_TOKEN: ${{ secrets.TWITTER_BEARER_TOKEN }}
@@ -18,7 +18,9 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v2
       - name: Enter MLB dir
-        run: cd mlb
+        run: |
+          cd mlb
+          ls
       - name: Install Python Dependencies
         run: |
           pip install -r requirements.txt
