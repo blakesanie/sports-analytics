@@ -32,6 +32,9 @@ print('todaysDate', todaysDate)
 # todaysDate = '2022-05-30'
 sched = pd.DataFrame(statsapi.schedule(date=todaysDate))
 
+print('scheduled games')
+print(sched)
+
 final = sched.loc[(sched['status'] == 'Final') | (sched['status'] == 'Game Over')]
 
 notProcessed = final.loc[~final['game_id'].astype(str).isin(processedGames)]

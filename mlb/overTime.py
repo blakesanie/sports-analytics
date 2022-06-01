@@ -27,7 +27,7 @@ def getInningTimeStamps(pitching):
     outChanges['inningsPitched'] = outChanges['inningsPitched'].astype(float)
     # in the case of a walk off, check if the last row is not a whole number
     isWalkOff = False
-    if inningsPitched[-1] % 1 != 0:
+    if inningsPitched[-1] % 1 != 0 and inningsPitched[-1] > 8:
         lastRow = pitching.iloc[-1]
         lastRow['inningsPitched'] = math.ceil(float(lastRow['inningsPitched']))
         outChanges = outChanges.append(lastRow)
