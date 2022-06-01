@@ -228,7 +228,7 @@ def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, amap={}, legen
     plt.tight_layout()
     # axes.tick_params(axis='x', which='major', top=15)
     # plt.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1)
-    plt.show()
+    # plt.show()
     filename = f'./plots/{title.split(",")[0]}.png'
     fig.savefig(filename)
     return filename

@@ -23,6 +23,10 @@ except FileNotFoundError as e:
 
 tz = timezone('Pacific/Honolulu')
 todaysDate = datetime.now(tz).strftime('%Y-%m-%d')
+
+if storedDate is not None and storedDate != todaysDate:
+    processedGames = []
+
 print('todaysDate', todaysDate)
 # todaysDate = '2022-05-30'
 sched = pd.DataFrame(statsapi.schedule(date=todaysDate))
@@ -40,7 +44,7 @@ threads = []
 
 gameData = []
 
-for game in notProcessed.to_dict(orient="records")[:1]:
+for game in notProcessed.to_dict(orient="records"):
     threads.append(Thread(target=getGameData, args=(game, gameData)))
 
 for thread in threads:
@@ -55,5 +59,5 @@ for game, pbp in gameData:
     print(filename)
     postTweetWithFilenames(message, [filename])
 
-with open('readme.txt', 'w') as f:
-    f.write(todaysDate + '\n' + '\n'.join((processedGames + list(notProcessed['game_id']))))
+with open('history.txt', 'w') as f:
+    f.write(todaysDate + '\n' + '\n'.join((processedGames + list(notProcessed['game_id'].astype(str)))))
