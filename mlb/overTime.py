@@ -28,7 +28,7 @@ def getInningTimeStamps(pitching):
 
 
 def runsOverGame(teamName1, teamName2, date, game=None, pbp=None, battingStats=[], pitchingStats=[], xLabel=None, yLabel=None, title=None, legendLocation='lower right', markerLine=None, homeColor=None, awayColor=None, twitterLocation=None, legendCoords=None):
-    cols = ['id', 'primary', 'name', 'display_code']
+    cols = ['id', 'primary', 'name', 'display_code', 'shortName']
     if game is None:
         teams = {
             'away': dict(zip(cols, getTeamColsByName(teamName1, columns=cols))),
@@ -91,17 +91,24 @@ def runsOverGame(teamName1, teamName2, date, game=None, pbp=None, battingStats=[
         }]
 
         for play in plays['plays']:
+            capitalizedWordsEncountered = 0
+            for word in play['result']['description'].replace(teams['home']['shortName'], '').replace(teams['away']['shortName'], '').split(' '):
+                if word.title() == word:
+                    if capitalizedWordsEncountered == 1:
+                        lastName = word
+                        break
+                    capitalizedWordsEncountered += 1
             if play['about']['halfInning'] == 'top':
                 awayPoints.append({
                     'timeStamp': play['about']['endTime'],
                     'away runs': play['result']['awayScore'],
-                    'away runs label': str(play['result']['description'].split(' ')[1])
+                    'away runs label': lastName
                 })
             else:
                 homePoints.append({
                     'timeStamp': play['about']['endTime'],
                     'home runs': play['result']['homeScore'],
-                    'home runs label': str(play['result']['description'].split(' ')[1])
+                    'home runs label': lastName
                 })
 
         homePoints = pd.DataFrame(homePoints)
