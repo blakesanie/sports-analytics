@@ -208,5 +208,5 @@ def runsOverGame(teamName1, teamName2, date, game=None, pbp=None, battingStats=[
     day = int(gameDate[-2:])
 
     filename = plotLines(dfs, xLabel=xLabel, yLabel=yLabel, title=f"{teams['away']['display_code']} @ {teams['home']['display_code']}, {month}/{day}/{year}{f', {title}' if title else ''}", cmap=cmap, amap=amap, legendLocation=legendLocation, innings=innings, inningsMarkers=inningsMarkers, legendCoords=legendCoords, twitterLocation=twitterLocation)
-    message = statsGame['summmary']
+    message = statsGame['summary']
     return filename, message

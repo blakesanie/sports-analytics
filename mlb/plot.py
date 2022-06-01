@@ -79,6 +79,7 @@ def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, amap={}, legen
 
                             txt.set_path_effects([path_effects.Stroke(linewidth=2, foreground='white'),
                                                   path_effects.Normal()])
+                            print('set txt path effects')
 
                             # for _ in range(3):
                             #     transf = axes.transData.inverted()
