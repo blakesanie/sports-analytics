@@ -18,14 +18,12 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v2
       - name: Install Python Dependencies
+        working-directory: ./mlb
         run: |
           pip install -r requirements.txt
-      - name: Enter MLB dir
-        run: |
-          cd mlb
-          ls
       - name: process new games
-        run: python ./automated.py
+        working-directory: ./mlb
+        run: python automated.py
       - name: Commit and push if changed
         run: |
           git config --global user.name 'Blake Sanie'
