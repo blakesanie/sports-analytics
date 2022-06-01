@@ -4,12 +4,14 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator, FixedLocator
 import matplotlib.dates as mdates
 import matplotlib.patheffects as path_effects
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+from matplotlib.cbook import get_sample_data
 matplotlib.rcParams['timezone'] = 'US/Eastern'
 import re
 import datetime as datetime
 
 
-def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, amap={}, legendLocation='lower right', innings=None, inningsMarkers=[], dateFormatStr='%-I:%M%p', league='mlb', lineThickness=4.0, notes=[], legendCoords=None, twitterLocation=None):
+def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, amap={}, legendLocation='lower right', innings=None, inningsMarkers=[], dateFormatStr='%-I:%M%p', league='mlb', lineThickness=4.0, notes=[], legendCoords=None, twitterLocation=None, bang=None):
 
     fig, axes = plt.subplots(1, 1)
     fig.set_figheight(5)
@@ -75,7 +77,7 @@ def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, amap={}, legen
                             colWithoutLabel = col.replace(
                                 ' Label', '')
                             txt = axes.text(df.index[i], df[colWithoutLabel][i], df[col][i] + ' ', ha='right', va='center',
-                                            fontsize=8)  # backgroundcolor='#ffffffc0'
+                                            fontsize=8, zorder=5)  # backgroundcolor='#ffffffc0'
 
                             txt.set_path_effects([path_effects.Stroke(linewidth=2, foreground='white'),
                                                   path_effects.Normal()])
@@ -175,6 +177,13 @@ def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, amap={}, legen
     #             axes.step(df.index, df[col], cmap.get(team, 'black'), where='post',
     #                       label=col, alpha=0.8, linewidth=lineThickness - numLines * 2, ls='-' if numLines == 0 else '--')
     #             numLines += 1
+
+    if bang:
+        im = OffsetImage(plt.imread('bang.png'), zoom=0.08, zorder=2)
+        ab = AnnotationBbox(im, bang, xycoords='data', frameon=False)
+        axes.add_artist(ab)
+
+
     if xLabel:
         axes.set_xlabel(xLabel)
     if yLabel:

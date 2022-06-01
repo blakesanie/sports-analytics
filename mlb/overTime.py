@@ -6,6 +6,8 @@ from plot import plotLines
 import pytz
 import re
 from color import color_similarity
+import math
+
 
 def camel_case_split(identifier):
     matches = re.finditer('.+?(?:(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|$)', identifier)
@@ -22,9 +24,17 @@ def getInningTimeStamps(pitching):
     inningsPitched = pitching['inningsPitched'].astype(float)
     outChanges = pitching.loc[inningsPitched.diff() != 0]
     outChanges = outChanges[1:] # remove 0 outs at start of game
-    inningsPitched = outChanges['inningsPitched'].astype(float)
+    outChanges['inningsPitched'] = outChanges['inningsPitched'].astype(float)
+    # in the case of a walk off, check if the last row is not a whole number
+    isWalkOff = False
+    if inningsPitched[-1] % 1 != 0:
+        lastRow = pitching.iloc[-1]
+        lastRow['inningsPitched'] = math.ceil(float(lastRow['inningsPitched']))
+        outChanges = outChanges.append(lastRow)
+        isWalkOff = True
+    inningsPitched = outChanges['inningsPitched']
     inningChanges = outChanges.loc[inningsPitched % 1 == 0]
-    return outChanges, inningChanges
+    return outChanges, inningChanges, isWalkOff
 
 
 def runsOverGame(teamName1, teamName2, date, game=None, pbp=None, battingStats=[], pitchingStats=[], xLabel=None, yLabel=None, title=None, legendLocation='lower right', markerLine=None, homeColor=None, awayColor=None, twitterLocation=None, legendCoords=None):
@@ -54,8 +64,9 @@ def runsOverGame(teamName1, teamName2, date, game=None, pbp=None, battingStats=[
 
     homePitching, awayPitching, homeBatting, awayBatting = getPlayByPlay(statsGame['game_id']) if pbp is None else pbp
 
-    awayOutChanges, awayInningChanges = getInningTimeStamps(homePitching)
-    homeOutChanges, homeInningChanges = getInningTimeStamps(awayPitching)
+    awayOutChanges, awayInningChanges, _ = getInningTimeStamps(homePitching)
+    homeOutChanges, homeInningChanges, isWalkOff = getInningTimeStamps(awayPitching)
+
 
     allInnings = pd.concat((awayInningChanges, homeInningChanges))
     allInnings.loc[startTime] = 0
@@ -186,6 +197,8 @@ def runsOverGame(teamName1, teamName2, date, game=None, pbp=None, battingStats=[
                 amap[key] = 0.5 + similarity / 150 * 0.3
                 break
 
+    walkOff = (homeDf.index[homeDf['home runs'].argmax()], homeDf['home runs'].max()) if isWalkOff else None
+
     print(similarity, cmap)
     for i, df in enumerate(dfs):
         df = df.sort_index()
@@ -215,6 +228,6 @@ def runsOverGame(teamName1, teamName2, date, game=None, pbp=None, battingStats=[
     month = int(gameDate[5:7])
     day = int(gameDate[-2:])
 
-    filename = plotLines(dfs, xLabel=xLabel, yLabel=yLabel, title=f"{teams['away']['display_code']} @ {teams['home']['display_code']}, {month}/{day}/{year}{f', {title}' if title else ''}", cmap=cmap, amap=amap, legendLocation=legendLocation, innings=innings, inningsMarkers=inningsMarkers, legendCoords=legendCoords, twitterLocation=twitterLocation)
+    filename = plotLines(dfs, xLabel=xLabel, yLabel=yLabel, title=f"{teams['away']['display_code']} @ {teams['home']['display_code']}, {month}/{day}/{year}{f', {title}' if title else ''}", cmap=cmap, amap=amap, legendLocation=legendLocation, innings=innings, inningsMarkers=inningsMarkers, legendCoords=legendCoords, twitterLocation=twitterLocation, bang=walkOff)
     message = statsGame['summary']
     return filename, message
