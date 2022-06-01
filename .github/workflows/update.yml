@@ -2,8 +2,6 @@ name: Process MLB Games
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "*/15 * * * *"
 
 jobs:
   mlb:
