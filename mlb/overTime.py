@@ -93,7 +93,7 @@ def runsOverGame(teamName1, teamName2, date, game=None, pbp=None, battingStats=[
         for play in plays['plays']:
             capitalizedWordsEncountered = 0
             for word in play['result']['description'].replace(teams['home']['teamName'], '').replace(teams['away']['teamName'], '').split(' '):
-                if len(word) > 0 and word[0] == word[0].upper():
+                if len(word) > 0 and word[0].isalpha() and word[0] == word[0].upper():
                     if capitalizedWordsEncountered == 1:
                         regex = re.compile('[^a-zA-Z]')
                         lastName = regex.sub('', word)
