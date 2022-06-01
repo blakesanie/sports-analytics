@@ -28,5 +28,6 @@ jobs:
         run: |
           git config --global user.name 'Blake Sanie'
           git config --global user.email 'blakesanie@users.noreply.github.com'
+          git add mlb/history.txt
           git commit -am "Automated update" || true
           git push || true
