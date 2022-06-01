@@ -56,9 +56,9 @@ def getPlayByPlay(gameId):
     return out
 
 
-def getGame(team1, team2, date):
+def getGame(team1, team2, date, gameIndex=0):
     out = statsapi.schedule(
-        date=date, team=team1, opponent=team2)[0]
+        date=date, team=team1, opponent=team2)[gameIndex]
     print('game', out)
     return out
 

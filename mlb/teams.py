@@ -17,13 +17,43 @@ if __name__ == '__main__':
     teams['display_code'] = teams['display_code'].str.upper()
 
     teams = teams.drop(['teamCode', 'fileCode', 'club'], axis=1)
-    teams = teams.set_index('id')
 
-    twitterData = [
-        ('SFG', 'SFGiants', 'SFGiants'),
-        ('SDP', 'Padres', 'TimeToShine'),
-        ('LAD', 'Dodgers', 'Dodgers')
-    ]
+    twitterData = pd.DataFrame([
+        ('SF', 'SFGiants', 'SFGiants SFG'),
+        ('SD', 'Padres', 'TimeToShine Padres'),
+        ('LAD', 'Dodgers', 'Dodgers LAD'),
+        ('ARI', 'Dbacks', 'Dbacks'),
+        ('COL', 'Rockies', 'Rockies'),
+        ('NYM', 'Mets', 'LGM NYM Mets'),
+        ('ATL', 'Braves', 'ForTheA Braves'),
+        ('PHI', 'Phillies', 'RingTheBell Phillies'),
+        ('MIA', 'Marlins', 'MakeItMiami Marlins'),
+        ('WSH', 'Nationals', 'NATITUDE Nationals'),
+        ('MIL', 'Brewers', 'ThisIsMyCrew BrewCrew Brewers'),
+        ('STL', 'Cardinals', 'STLCards Cardinals'),
+        ('PIT', 'Pirates', 'RaiseIt LetsGoBucs Pirates'),
+        ('CHC', 'Cubs', 'Cubs Cubbies'),
+        ('CIN', 'REDS', 'ATOBTTR Reds'),
+        ('NYY', 'Yankees', 'RepBX Yankees NYY BronxBombers'),
+        ('BOS', 'RedSox' 'DirtyWater RedSox'),
+        ('TOR', 'BlueJays', 'NextLevel BlueJays'),
+        ('BAL', 'Orioles', 'Birdland Orioles'),
+        ('TB', 'RaysBaseball', 'RaysUp Rays'),
+        ('MIN', 'Twins', 'MNTwins'),
+        ('CWS', 'whitesox', 'ChangeTheGame WhiteSox'),
+        ('CLE', 'CleGuardians', 'ForTheLand Guardians'),
+        ('DET', 'tigers', 'DetroitRoots Tigers'),
+        ('KC', 'Royals', 'RoyalsAssist Royals'),
+        ('HOU', 'astros', 'LevelUp Astros'),
+        ('LAA', 'Angels', 'GoHalos Angels'),
+        ('TEX', 'Rangers', 'StraightUpTX Rangers'),
+        ('SEA', 'Mariners', 'SeaUsRise Mariners'),
+        ('OAK', 'Athletics', 'RootedInOakland DrumTogether Athletics As')
+    ], columns=['display_code', 'twitterHandle', 'hashtags'])
+
+    teams = teams.merge(twitterData, left_on='display_code', right_on='display_code')
+
+    teams = teams.set_index('id')
 
     teams.to_csv('teams.csv')
     print('generated teams.csv')
@@ -37,4 +67,6 @@ else:
 def getTeamColsByName(teamName, type='short', columns=['id']):
     return teams.loc[teams['teamName' if type == 'short' else 'name'] == teamName][columns].values[0]
 
-
+def getTwitterInfoByFullName(name):
+    out = teams.loc[name == teams['name']]
+    return '@' + out['twitterHandle'].values[0], ' '.join(['#' + tag for tag in out['hashtags'].values[0].split(' ')])

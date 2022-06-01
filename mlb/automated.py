@@ -59,7 +59,7 @@ for thread in threads:
 
 for game, pbp in gameData:
     filename, message = runsOverGame('', '', '', game=game, pbp=pbp, battingStats=['runs'], pitchingStats=['pitcherCount'], markerLine='runs',
-                 xLabel="Time (US/Eastern)", yLabel="Runs", title="Runs over Time", legendLocation='best')
+                 xLabel="Time (US/Eastern)", yLabel="Runs", legendLocation='best')
     print(filename)
     postTweetWithFilenames(message, [filename])
 

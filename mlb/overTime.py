@@ -1,6 +1,6 @@
 import pandas as pd
 from datetime import datetime, timezone
-from teams import getTeamColsByName
+from teams import getTeamColsByName, getTwitterInfoByFullName
 from game import getGame, getScoringPlays, getPlayByPlay
 from plot import plotLines
 import pytz
@@ -37,14 +37,14 @@ def getInningTimeStamps(pitching):
     return outChanges, inningChanges, isWalkOff
 
 
-def runsOverGame(teamName1, teamName2, date, game=None, pbp=None, battingStats=[], pitchingStats=[], xLabel=None, yLabel=None, title=None, legendLocation='lower right', markerLine=None, homeColor=None, awayColor=None, twitterLocation=None, legendCoords=None):
+def runsOverGame(teamName1, teamName2, date, game=None, pbp=None, gameIndex=0, battingStats=[], pitchingStats=[], xLabel=None, yLabel=None, title=None, legendLocation='lower right', markerLine=None, homeColor=None, awayColor=None, twitterLocation=None, legendCoords=None):
     cols = ['id', 'primary', 'name', 'display_code', 'teamName']
     if game is None:
         teams = {
             'away': dict(zip(cols, getTeamColsByName(teamName1, columns=cols))),
             'home': dict(zip(cols, getTeamColsByName(teamName2, columns=cols)))
         }
-        statsGame = getGame(teams['away']['id'], teams['home']['id'], date)
+        statsGame = getGame(teams['away']['id'], teams['home']['id'], date, gameIndex=gameIndex)
         if statsGame['away_name'] != teams['away']['name']:
             temp = teams['away']
             teams['away'] = teams['home']
@@ -228,6 +228,16 @@ def runsOverGame(teamName1, teamName2, date, game=None, pbp=None, battingStats=[
     month = int(gameDate[5:7])
     day = int(gameDate[-2:])
 
-    filename = plotLines(dfs, xLabel=xLabel, yLabel=yLabel, title=f"{teams['away']['display_code']} @ {teams['home']['display_code']}, {month}/{day}/{year}{f', {title}' if title else ''}", cmap=cmap, amap=amap, legendLocation=legendLocation, innings=innings, inningsMarkers=inningsMarkers, legendCoords=legendCoords, twitterLocation=twitterLocation, bang=walkOff)
-    message = statsGame['summary']
+    doubleHeader = '' if statsGame['doubleheader'] == 'N' else f", Game {statsGame['game_num']} of 2"
+
+    filename = plotLines(dfs, xLabel=xLabel, yLabel=yLabel, title=f"{teams['away']['display_code']} @ {teams['home']['display_code']}{doubleHeader}, {month}/{day}/{year}{f', {title}' if title else ''}", cmap=cmap, amap=amap, legendLocation=legendLocation, innings=innings, inningsMarkers=inningsMarkers, legendCoords=legendCoords, twitterLocation=twitterLocation, bang=walkOff)
+
+    winningHandle, winningHashTags = getTwitterInfoByFullName(statsGame['winning_team'])
+    losingHandle, losingHashTags = getTwitterInfoByFullName(statsGame['losing_team'])
+
+    winningScore = max(statsGame['away_score'], statsGame['home_score'])
+    losingScore = min(statsGame['away_score'], statsGame['home_score'])
+
+    message = f"{winningHandle} ({winningScore}) > {losingHandle} ({losingScore}){doubleHeader}, {month}/{day}/{year} | {statsGame['venue_name']} {winningHashTags} {losingHashTags}"
+
     return filename, message
