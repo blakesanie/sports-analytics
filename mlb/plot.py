@@ -119,7 +119,7 @@ def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, amap={}, legen
                               ls='-' if colI == 0 else '--')
                         if league == 'mlb':
                             changeMask = df[col].diff() != 0
-                            axes.plot(df.index[changeMask][1:], df[col][changeMask][1:], ls='none', c='none', marker='o', mfc='w', mec='none', ms=2)
+                            axes.plot(df.index[changeMask][1:], df[col][changeMask][1:], ls='none', c='none', marker='o', mfc='w', mec='none', ms=2, zorder=3)
                         max = df[col].max()
                         if max > seriesMax:
                             seriesMax = max
