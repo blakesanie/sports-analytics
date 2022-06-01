@@ -23,7 +23,7 @@ jobs:
           ls
       - name: Install Python Dependencies
         run: |
-          pip install -r requirements.txt
+          pip install -r ./requirements.txt
       - name: process new games
         run: python automated.py
       - name: Commit and push if changed
