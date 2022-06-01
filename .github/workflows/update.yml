@@ -17,13 +17,13 @@ jobs:
         uses: actions/checkout@v2
       - name: Install Python
         uses: actions/setup-python@v2
+      - name: Install Python Dependencies
+        run: |
+          pip install -r requirements.txt
       - name: Enter MLB dir
         run: |
           cd mlb
           ls
-      - name: Install Python Dependencies
-        run: |
-          pip install -r ./requirements.txt
       - name: process new games
         run: python automated.py
       - name: Commit and push if changed
