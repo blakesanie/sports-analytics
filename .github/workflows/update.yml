@@ -25,7 +25,7 @@ jobs:
           cd mlb
           ls
       - name: process new games
-        run: python automated.py
+        run: python ./automated.py
       - name: Commit and push if changed
         run: |
           git config --global user.name 'Blake Sanie'
