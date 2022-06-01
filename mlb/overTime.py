@@ -7,6 +7,7 @@ import pytz
 import re
 from color import color_similarity
 import math
+import random
 
 
 def camel_case_split(identifier):
@@ -241,7 +242,7 @@ def runsOverGame(teamName1, teamName2, date, game=None, pbp=None, gameIndex=0, b
     if isWalkOff:
         starter = 'Walk off! 💥'
     else:
-        starter = ["Just now:", "Final:", "This just in:", "Moments ago:", "Final score:"]
+        starter = random.choice(["Just now:", "Final:", "This just in:", "Moments ago:", "Final score:"])
 
     message = f"{starter} {winningHandle} ({winningScore}) > {losingHandle} ({losingScore}){doubleHeader}, {month}/{day}/{year} | {statsGame['venue_name']} {winningHashTags} {losingHashTags}"
 
