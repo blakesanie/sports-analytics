@@ -30,15 +30,17 @@ def getInningTimeStamps(pitching, homePitching=None, awayInningChanges=None):
     isWalkOff = False
     if homePitching is not None and awayInningChanges is not None:
         homeInningsPitched = awayInningChanges['inningsPitched'].max()
-        lastEndOfTop = awayInningChanges.index[-1]
+        lastEndOfTopTimeStamp = awayInningChanges.index[-1]
         awayScore = homePitching['runs'].max()
         homeScore = pitching['runs'].max()
-        lastHomeRunScoredTimeStamp = pitching[pitching['runs'] > awayScore].index[0]
-        if homeInningsPitched >= 9 and homeScore > awayScore and lastHomeRunScoredTimeStamp > lastEndOfTop:
-            lastRow = pitching.iloc[-1]
-            lastRow['inningsPitched'] = math.ceil(float(lastRow['inningsPitched']))
-            outChanges = outChanges.append(lastRow)
-            isWalkOff = True
+        winningRuns = pitching[pitching['runs'] > awayScore]
+        if len(winningRuns)> 0:
+            lastHomeRunScoredTimeStamp = winningRuns.index[0]
+            if homeInningsPitched >= 9 and homeScore > awayScore and lastHomeRunScoredTimeStamp > lastEndOfTopTimeStamp:
+                lastRow = pitching.iloc[-1]
+                lastRow['inningsPitched'] = math.ceil(float(lastRow['inningsPitched']))
+                outChanges = outChanges.append(lastRow)
+                isWalkOff = True
     inningsPitched = outChanges['inningsPitched']
     inningChanges = outChanges.loc[inningsPitched % 1 == 0]
     return outChanges, inningChanges, isWalkOff
