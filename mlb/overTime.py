@@ -21,14 +21,14 @@ def capitalize(string):
 def getPitchingChanges(pitching):
     return pitching.loc[pitching['pitcherCount'].diff() != 0][1:]
 
-def getInningTimeStamps(pitching):
+def getInningTimeStamps(pitching, homeMax=0, awayRuns=0):
     inningsPitched = pitching['inningsPitched'].astype(float)
     outChanges = pitching.loc[inningsPitched.diff() != 0]
     outChanges = outChanges[1:] # remove 0 outs at start of game
     outChanges['inningsPitched'] = outChanges['inningsPitched'].astype(float)
     # in the case of a walk off, check if the last row is not a whole number
     isWalkOff = False
-    if inningsPitched[-1] % 1 != 0 and inningsPitched[-1] > 8:
+    if  8 <= inningsPitched[-1] < homeMax and pitching['runs'][-1] > awayRuns:
         lastRow = pitching.iloc[-1]
         lastRow['inningsPitched'] = math.ceil(float(lastRow['inningsPitched']))
         outChanges = outChanges.append(lastRow)
@@ -36,6 +36,9 @@ def getInningTimeStamps(pitching):
     inningsPitched = outChanges['inningsPitched']
     inningChanges = outChanges.loc[inningsPitched % 1 == 0]
     return outChanges, inningChanges, isWalkOff
+
+def getFirstPitchTime(pitching):
+    return pitching.loc[pitching['pitchesThrown'] == 1].index[0]
 
 
 def runsOverGame(teamName1, teamName2, date, game=None, pbp=None, gameIndex=0, battingStats=[], pitchingStats=[], xLabel=None, yLabel=None, title=None, legendLocation='lower right', markerLine=None, homeColor=None, awayColor=None, twitterLocation=None, legendCoords=None):
@@ -57,17 +60,20 @@ def runsOverGame(teamName1, teamName2, date, game=None, pbp=None, gameIndex=0, b
         }
         statsGame = game
 
+
+    homePitching, awayPitching, homeBatting, awayBatting = getPlayByPlay(statsGame['game_id']) if pbp is None else pbp
+
+    awayOutChanges, awayInningChanges, _ = getInningTimeStamps(homePitching)
+    homeOutChanges, homeInningChanges, isWalkOff = getInningTimeStamps(awayPitching, homeMax=awayInningChanges['inningsPitched'].max(), awayRuns=homePitching['runs'][-1])
+
     startTime = pd.DataFrame([{'startTime': statsGame['game_datetime']}]).set_index('startTime')
     startTime.index = pd.to_datetime(
         startTime.index).tz_convert('US/Eastern')
     startTime = startTime.index[0]
 
+    firstPitchTime = getFirstPitchTime(homePitching)
 
-    homePitching, awayPitching, homeBatting, awayBatting = getPlayByPlay(statsGame['game_id']) if pbp is None else pbp
-
-    awayOutChanges, awayInningChanges, _ = getInningTimeStamps(homePitching)
-    homeOutChanges, homeInningChanges, isWalkOff = getInningTimeStamps(awayPitching)
-
+    startTime = max(startTime, firstPitchTime)
 
     allInnings = pd.concat((awayInningChanges, homeInningChanges))
     allInnings.loc[startTime] = 0

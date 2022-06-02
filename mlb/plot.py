@@ -77,7 +77,7 @@ def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, amap={}, legen
                             colWithoutLabel = col.replace(
                                 ' Label', '')
                             txt = axes.text(df.index[i], df[colWithoutLabel][i], df[col][i] + ' ', ha='right', va='center',
-                                            fontsize=8, zorder=5)  # backgroundcolor='#ffffffc0'
+                                            fontsize=7, zorder=5)  # backgroundcolor='#ffffffc0'
 
                             txt.set_path_effects([path_effects.Stroke(linewidth=2, foreground='white'),
                                                   path_effects.Normal()])
@@ -213,7 +213,8 @@ def plotLines(dfs, title=None, xLabel=None, yLabel=None, cmap={}, amap={}, legen
 
     plt.gca().set_yticks([tick for tick in plt.gca().get_yticks() if tick >=0])
     for team, txt in labels:
-        txt.set_y(txt._y + yRange * (-0.03 if team == seriesMaxTeam else 0.025))
+        txt.set_va('top' if team == seriesMaxTeam else 'bottom')
+        txt.set_y(txt._y + yRange * (-0.009 if team == seriesMaxTeam else 0.005))
 
     if innings is not None:
         if not isinstance(innings, list):
