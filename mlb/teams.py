@@ -35,7 +35,7 @@ if __name__ == '__main__':
         ('CHC', 'Cubs', 'Cubs Cubbies'),
         ('CIN', 'REDS', 'ATOBTTR Reds'),
         ('NYY', 'Yankees', 'RepBX Yankees NYY BronxBombers'),
-        ('BOS', 'RedSox' 'DirtyWater RedSox'),
+        ('BOS', 'RedSox', 'DirtyWater RedSox'),
         ('TOR', 'BlueJays', 'NextLevel BlueJays'),
         ('BAL', 'Orioles', 'Birdland Orioles'),
         ('TB', 'RaysBaseball', 'RaysUp Rays'),
