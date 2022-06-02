@@ -21,18 +21,24 @@ def capitalize(string):
 def getPitchingChanges(pitching):
     return pitching.loc[pitching['pitcherCount'].diff() != 0][1:]
 
-def getInningTimeStamps(pitching, homeMax=0, awayRuns=0):
+def getInningTimeStamps(pitching, homePitching=None, awayInningChanges=None):
     inningsPitched = pitching['inningsPitched'].astype(float)
     outChanges = pitching.loc[inningsPitched.diff() != 0]
     outChanges = outChanges[1:] # remove 0 outs at start of game
     outChanges['inningsPitched'] = outChanges['inningsPitched'].astype(float)
     # in the case of a walk off, check if the last row is not a whole number
     isWalkOff = False
-    if  8 <= inningsPitched[-1] < homeMax and pitching['runs'][-1] > awayRuns:
-        lastRow = pitching.iloc[-1]
-        lastRow['inningsPitched'] = math.ceil(float(lastRow['inningsPitched']))
-        outChanges = outChanges.append(lastRow)
-        isWalkOff = True
+    if homePitching is not None and awayInningChanges is not None:
+        homeInningsPitched = awayInningChanges['inningsPitched'].max()
+        lastEndOfTop = awayInningChanges.index[-1]
+        awayScore = homePitching['runs'].max()
+        homeScore = pitching['runs'].max()
+        lastHomeRunScoredTimeStamp = pitching[pitching['runs'] > awayScore].index[0]
+        if homeInningsPitched >= 9 and homeScore > awayScore and lastHomeRunScoredTimeStamp > lastEndOfTop:
+            lastRow = pitching.iloc[-1]
+            lastRow['inningsPitched'] = math.ceil(float(lastRow['inningsPitched']))
+            outChanges = outChanges.append(lastRow)
+            isWalkOff = True
     inningsPitched = outChanges['inningsPitched']
     inningChanges = outChanges.loc[inningsPitched % 1 == 0]
     return outChanges, inningChanges, isWalkOff
@@ -64,7 +70,7 @@ def runsOverGame(teamName1, teamName2, date, game=None, pbp=None, gameIndex=0, b
     homePitching, awayPitching, homeBatting, awayBatting = getPlayByPlay(statsGame['game_id']) if pbp is None else pbp
 
     awayOutChanges, awayInningChanges, _ = getInningTimeStamps(homePitching)
-    homeOutChanges, homeInningChanges, isWalkOff = getInningTimeStamps(awayPitching, homeMax=awayInningChanges['inningsPitched'].max(), awayRuns=homePitching['runs'][-1])
+    homeOutChanges, homeInningChanges, isWalkOff = getInningTimeStamps(awayPitching, homePitching=homePitching, awayInningChanges=awayInningChanges)
 
     startTime = pd.DataFrame([{'startTime': statsGame['game_datetime']}]).set_index('startTime')
     startTime.index = pd.to_datetime(
