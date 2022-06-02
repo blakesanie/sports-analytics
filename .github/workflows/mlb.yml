@@ -3,7 +3,7 @@ name: Process MLB Games
 on:
   workflow_dispatch:
   schedule:
-    - cron: '*/16 * * * *'
+    - cron: '*/15 * * * *'
 jobs:
   mlb:
     runs-on: ubuntu-latest
