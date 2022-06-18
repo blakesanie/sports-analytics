@@ -144,7 +144,7 @@ def plotLines(
                             label="Timeout",
                             ls="none",
                             alpha=1,
-                            markersize=8,
+                            markersize=5,
                             markeredgecolor="black",
                         )
                         markersDrawn.add("Timeout")
@@ -155,7 +155,7 @@ def plotLines(
                         marker="o",
                         c="white",
                         ls="none",
-                        markersize=8,
+                        markersize=5,
                         alpha=1,
                         markeredgecolor=cmap.get(team, "black"),
                     )

@@ -147,6 +147,8 @@ def runsOverGame(
         )
         top = not top
 
+    innings = innings[1:] # do not need line before T1
+
     print("potential battingStats:", homeBatting.columns)
     print("potential pitchingStats:", homePitching.columns)
 
