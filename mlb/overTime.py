@@ -8,6 +8,7 @@ import re
 from color import color_similarity
 import math
 import random
+from string import punctuation
 
 
 def camel_case_split(identifier):
@@ -174,8 +175,7 @@ def runsOverGame(
             ):
                 if len(word) > 0 and word[0].isalpha() and word[0] == word[0].upper():
                     if capitalizedWordsEncountered == 1:
-                        regex = re.compile("[^a-zA-Z]")
-                        lastName = regex.sub("", word)
+                        lastName = word.strip(punctuation)
                         break
                     capitalizedWordsEncountered += 1
             if play["about"]["halfInning"] == "top":
