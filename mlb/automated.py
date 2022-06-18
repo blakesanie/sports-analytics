@@ -71,6 +71,8 @@ for game, pbp in gameData:
         print('waiting 2 minutes between')
         time.sleep(60 * 2)
     i += 1
+
+    print('working on', filename)
     filename, message = runsOverGame(
         "",
         "",
@@ -84,7 +86,6 @@ for game, pbp in gameData:
         yLabel="Runs",
         legendLocation="best",
     )
-    print(filename)
     postTweetWithFilenames(message, [filename])
 
 print("posted", len(gameData), "games")
