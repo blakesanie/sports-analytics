@@ -31,8 +31,12 @@ if storedDate is not None and storedDate != todaysDate:
     print("it is a new day!")
     processedGames = []
 
+# todaysDate = '2022-06-01'
+
 print("todaysDate", todaysDate)
 sched = pd.DataFrame(statsapi.schedule(date=todaysDate))
+
+# sched = sched[2:4]
 
 print("scheduled games")
 print(sched)
@@ -61,7 +65,12 @@ for thread in threads:
 for thread in threads:
     thread.join()
 
+i = 0
 for game, pbp in gameData:
+    if i > 0:
+        print('waiting 2 minutes between')
+        time.sleep(60 * 2)
+    i += 1
     filename, message = runsOverGame(
         "",
         "",
@@ -77,8 +86,6 @@ for game, pbp in gameData:
     )
     print(filename)
     postTweetWithFilenames(message, [filename])
-    print('waiting 2 minutes')
-    time.sleep(60 * 2)
 
 print("posted", len(gameData), "games")
 
