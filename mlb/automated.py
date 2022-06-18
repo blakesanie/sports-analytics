@@ -72,20 +72,23 @@ for game, pbp in gameData:
         time.sleep(60 * 2)
     i += 1
 
-    print('working on', filename)
-    filename, message = runsOverGame(
-        "",
-        "",
-        "",
-        game=game,  # provide our collected game and PBP data
-        pbp=pbp,
-        battingStats=["runs"],
-        pitchingStats=["pitcherCount"],
-        markerLine="runs",
-        xLabel="Time (US/Eastern)",
-        yLabel="Runs",
-        legendLocation="best",
-    )
+    print('working on', game)
+    try:
+        filename, message = runsOverGame(
+            "",
+            "",
+            "",
+            game=game,  # provide our collected game and PBP data
+            pbp=pbp,
+            battingStats=["runs"],
+            pitchingStats=["pitcherCount"],
+            markerLine="runs",
+            xLabel="Time (US/Eastern)",
+            yLabel="Runs",
+            legendLocation="best",
+        )
+    except Exception as e:
+        print('could not process game with exception', e)
     postTweetWithFilenames(message, [filename])
 
 print("posted", len(gameData), "games")
