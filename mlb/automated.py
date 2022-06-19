@@ -89,6 +89,7 @@ for game, pbp in gameData:
         )
     except Exception as e:
         print('could not process game with exception', e)
+        continue
     postTweetWithFilenames(message, [filename])
 
 print("posted", len(gameData), "games")
