@@ -4,3 +4,5 @@ mlbgame==2.5.0
 tqdm==4.62.3
 matplotlib==3.3.2
 tweepy==4.4.0
+praw==7.6.0
+
