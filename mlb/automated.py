@@ -6,6 +6,7 @@ from overTime import runsOverGame
 from threading import Thread
 import faulthandler
 import time
+
 faulthandler.enable()
 from game import getPlayByPlay
 from twitter import postTweetWithFilenames
@@ -68,11 +69,11 @@ for thread in threads:
 i = 0
 for game, pbp in gameData:
     if i > 0:
-        print('waiting 2 minutes between')
+        print("waiting 2 minutes between")
         time.sleep(60 * 2)
     i += 1
 
-    print('working on', game)
+    print("working on", game)
     try:
         filename, message = runsOverGame(
             "",
@@ -88,7 +89,7 @@ for game, pbp in gameData:
             legendLocation="best",
         )
     except Exception as e:
-        print('could not process game with exception', e)
+        print("could not process game with exception", e)
         continue
     processedGames.append(str(game["game_id"]))
     postTweetWithFilenames(message, [filename])
@@ -96,8 +97,4 @@ for game, pbp in gameData:
 print("posted", len(gameData), "games")
 
 with open("history.txt", "w") as f:
-    f.write(
-        todaysDate
-        + "\n"
-        + "\n".join((processedGames))
-    )
+    f.write(todaysDate + "\n" + "\n".join((processedGames)))
