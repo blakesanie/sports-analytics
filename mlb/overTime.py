@@ -350,7 +350,7 @@ def runsOverGame(
     else:
         starter = ""
 
-    message = f"{starter}{statsGame['winning_team']} ({winningScore}) > {statsGame['losing_team']} ({losingScore}){doubleHeader}\n\n{month}/{day}/{year[-2:]} @ {statsGame['venue_name']}, {getLocationByFullName(statsGame['home_name'])}\n\n{statsGame['winning_pitcher']} (W) > {statsGame['losing_pitcher']} (L)"
+    message = f"{starter}{statsGame['winning_team']} ({winningScore}) > {statsGame['losing_team']} ({losingScore}){doubleHeader}\n\n{month}/{day}/{year} @ {statsGame['venue_name']}, {getLocationByFullName(statsGame['home_name'])}\n\n{statsGame['winning_pitcher']} (W) > {statsGame['losing_pitcher']} (L)"
 
     if statsGame["save_pitcher"]:
         message += f"\n\nSave: statsGame['save_pitcher']"
