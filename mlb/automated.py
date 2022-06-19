@@ -6,10 +6,12 @@ from overTime import runsOverGame
 from threading import Thread
 import faulthandler
 import time
+import os
 
 faulthandler.enable()
 from game import getPlayByPlay
 from twitter import postTweetWithFilenames
+from reddit import postToReddit
 
 
 try:
@@ -32,7 +34,7 @@ if storedDate is not None and storedDate != todaysDate:
     print("it is a new day!")
     processedGames = []
 
-# todaysDate = '2022-06-01'
+# todaysDate = "2022-06-01"
 
 print("todaysDate", todaysDate)
 sched = pd.DataFrame(statsapi.schedule(date=todaysDate))
@@ -68,7 +70,7 @@ for thread in threads:
 
 i = 0
 for game, pbp in gameData:
-    if i > 0:
+    if i > 0 and os.getenv("FROM_GITHUB_ACTION"):
         print("waiting 2 minutes between")
         time.sleep(60 * 2)
     i += 1
@@ -92,7 +94,7 @@ for game, pbp in gameData:
         print("could not process game with exception", e)
         continue
     processedGames.append(str(game["game_id"]))
-    postTweetWithFilenames(message, [filename])
+    postToReddit(message, filename)
 
 print("posted", len(gameData), "games")
 

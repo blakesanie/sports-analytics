@@ -87,3 +87,7 @@ def getTwitterInfoByFullName(name):
     return "@" + out["twitterHandle"].values[0], " ".join(
         ["#" + tag for tag in out["hashtags"].values[0].split(" ")]
     )
+
+
+def getLocationByFullName(name):
+    return teams.loc[name == teams["name"]]["locationName"].values[0]

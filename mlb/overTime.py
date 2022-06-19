@@ -1,6 +1,6 @@
 import pandas as pd
 from datetime import datetime, timezone
-from teams import getTeamColsByName, getTwitterInfoByFullName
+from teams import getTeamColsByName, getTwitterInfoByFullName, getLocationByFullName
 from game import getGame, getScoringPlays, getPlayByPlay
 from plot import plotLines
 import pytz
@@ -148,7 +148,7 @@ def runsOverGame(
         )
         top = not top
 
-    innings = innings[1:] # do not need line before T1
+    innings = innings[1:]  # do not need line before T1
 
     print("potential battingStats:", homeBatting.columns)
     print("potential pitchingStats:", homePitching.columns)
@@ -346,12 +346,13 @@ def runsOverGame(
     losingScore = min(statsGame["away_score"], statsGame["home_score"])
 
     if isWalkOff:
-        starter = "Walk off! 💥"
+        starter = "Walk off 💥!"
     else:
-        starter = random.choice(
-            ["Just now:", "Final:", "This just in:", "Moments ago:", "Final score:"]
-        )
+        starter = ""
 
-    message = f"{starter} {winningHandle} ({winningScore}) > {losingHandle} ({losingScore}){doubleHeader}, {month}/{day}/{year} | {statsGame['venue_name']} {winningHashTags} {losingHashTags}"
+    message = f"{starter}{statsGame['winning_team']} ({winningScore}) > {statsGame['losing_team']} ({losingScore}){doubleHeader}\n\n{month}/{day}/{year[-2:]} @ {statsGame['venue_name']}, {getLocationByFullName(statsGame['home_name'])}\n\n{statsGame['winning_pitcher']} (W) > {statsGame['losing_pitcher']} (L)"
+
+    if statsGame["save_pitcher"]:
+        message += f"\n\nSave: statsGame['save_pitcher']"
 
     return filename, message
