@@ -69,7 +69,7 @@ i = 0
 for game, pbp in gameData:
     if i > 0:
         print('waiting 2 minutes between')
-        # time.sleep(60 * 2)
+        time.sleep(60 * 2)
     i += 1
 
     print('working on', game)
@@ -91,7 +91,7 @@ for game, pbp in gameData:
         print('could not process game with exception', e)
         continue
     processedGames.append(str(game["game_id"]))
-    # postTweetWithFilenames(message, [filename])
+    postTweetWithFilenames(message, [filename])
 
 print("posted", len(gameData), "games")
 
