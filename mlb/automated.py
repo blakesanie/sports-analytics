@@ -69,7 +69,7 @@ i = 0
 for game, pbp in gameData:
     if i > 0:
         print('waiting 2 minutes between')
-        time.sleep(60 * 2)
+        # time.sleep(60 * 2)
     i += 1
 
     print('working on', game)
@@ -90,7 +90,8 @@ for game, pbp in gameData:
     except Exception as e:
         print('could not process game with exception', e)
         continue
-    postTweetWithFilenames(message, [filename])
+    processedGames.append(str(game["game_id"]))
+    # postTweetWithFilenames(message, [filename])
 
 print("posted", len(gameData), "games")
 
@@ -98,5 +99,5 @@ with open("history.txt", "w") as f:
     f.write(
         todaysDate
         + "\n"
-        + "\n".join((processedGames + list(notProcessed["game_id"].astype(str))))
+        + "\n".join((processedGames))
     )
