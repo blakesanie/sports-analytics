@@ -19,5 +19,8 @@ api = tweepy.API(auth)
 
 
 def postTweetWithFilenames(text, filenames):
+    if not os.getenv("FROM_GITHUB_ACTION"):
+        print('not running from github action, will not post')
+        return
     media_ids = [api.media_upload(filename).media_id for filename in filenames]
     post_result = api.update_status(status=text, media_ids=media_ids)
