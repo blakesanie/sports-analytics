@@ -7,3 +7,7 @@
           language: system
           pass_filenames: false
           always_run: true
+    - repo: https://github.com/psf/black
+      rev: stable
+      hooks:
+        - id: black
