@@ -78,7 +78,7 @@ def runsOverGame(
     twitterLocation=None,
     legendCoords=None,
 ):
-    cols = ["id", "primary", "name", "display_code", "teamName"]
+    cols = ["id", "primary", "secondary", "name", "display_code", "teamName"]
     if game is None:
         teams = {
             "away": dict(zip(cols, getTeamColsByName(teamName1, columns=cols))),
@@ -266,10 +266,13 @@ def runsOverGame(
     amap = {}
 
     if similarity < 150:
-        for key, value in cmap.items():
-            if value == lightest:
-                amap[key] = 0.5 + similarity / 150 * 0.3
-                break
+        cmap[teams["away"]["display_code"]] = (
+            teams["away"]["secondary"] if awayColor is None else awayColor
+        )
+        # for key, value in cmap.items():
+        #     if value == lightest:
+        #         amap[key] = 0.5 + similarity / 150 * 0.3
+        #         break
 
     # if the game ends in a walk off, find the point (timestamp, runs) that corresponds
     walkOff = (
