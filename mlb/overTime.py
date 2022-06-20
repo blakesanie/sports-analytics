@@ -356,7 +356,7 @@ def runsOverGame(
         f"{statsGame['winning_pitcher']} (W) > {statsGame['losing_pitcher']} (L)",
     ]
 
-    if statsGame["save_pitcher"]:
+    if statsGame["save_pitcher"] and not math.isnan(statsGame["save_pitcher"]):
         message.append(f"\n\nSave: {statsGame['save_pitcher']}")
 
     return filename, message
