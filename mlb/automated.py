@@ -72,7 +72,7 @@ i = 0
 for game, pbp in gameData:
     if i > 0 and os.getenv("FROM_GITHUB_ACTION"):
         print("waiting 2 minutes between")
-        time.sleep(60 * 2)
+        # time.sleep(60 * 2)
     i += 1
 
     print("working on", game)
