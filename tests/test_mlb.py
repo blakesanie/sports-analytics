@@ -7,3 +7,11 @@ def test_twitter_live():
                 numPostTweet += 1
                 assert "#" not in line, f"The following line may be commented: {line}"
         assert numPostTweet > 0, "no attempt to tweet"
+
+
+def test_not_fixed_game():
+    with open("./mlb/automated.py") as f:
+        for line in f.readlines():
+            assert (
+                not ('todaysDate = "' in line or "todaysDate = '" in line)
+            ) or "#" in line, f"The following line may be fixing the date: {line}"
