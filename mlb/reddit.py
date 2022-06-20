@@ -22,4 +22,4 @@ def postToReddit(title, path):
     if not os.getenv("FROM_GITHUB_ACTION"):
         print("not running from github action, will not post")
         return
-    reddit.subreddit("mlbVis").submit_image(title, path)
+    reddit.subreddit("mlbVis").submit_image(title.replace(r"\n", "\n"), path)
