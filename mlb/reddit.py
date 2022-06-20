@@ -26,4 +26,4 @@ def postToReddit(message, path):
     # image = InlineImage(path=path)
     # media = {"image1": image}
     # reddit.subreddit("mlbVis").submit(message[0], inline_media=media, selftext='\n\n'.join(message[1:]))
-    reddit.subreddit("mlbVis").submit_image(" | ".join(message), path)
+    reddit.subreddit("mlbVis").submit_image(" || ".join(message), path)
