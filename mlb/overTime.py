@@ -56,7 +56,7 @@ def getInningTimeStamps(pitching, homePitching=None, awayInningChanges=None):
 
 
 def getFirstPitchTime(pitching):
-    return pitching.loc[pitching["pitchesThrown"] == 1].index[0]
+    return pitching.loc[pitching["pitchesThrown"] >= 1].index[0]
 
 
 def runsOverGame(
