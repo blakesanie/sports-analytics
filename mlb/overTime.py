@@ -349,7 +349,7 @@ def runsOverGame(
     losingScore = min(statsGame["away_score"], statsGame["home_score"])
 
     if isWalkOff:
-        starter = "Walk off 💥!"
+        starter = "Walk off 💥! "
     else:
         starter = ""
 
