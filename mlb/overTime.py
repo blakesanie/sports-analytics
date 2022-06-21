@@ -173,8 +173,8 @@ def runsOverGame(
                 .replace(teams["away"]["teamName"], "")
                 .split(" ")
             ):
-                if len(word) > 0 and word[0].isalpha() and word[0] == word[0].upper():
-                    if capitalizedWordsEncountered == 1:
+                if len(word) > 0 and word.lower() != word:
+                    if capitalizedWordsEncountered == 1:  # if contains capital
                         lastName = word.strip(punctuation)
                         break
                     capitalizedWordsEncountered += 1
@@ -359,7 +359,7 @@ def runsOverGame(
         f"{statsGame['winning_pitcher']} (W) > {statsGame['losing_pitcher']} (L)",
     ]
 
-    if statsGame["save_pitcher"] and not math.isnan(statsGame["save_pitcher"]):
+    if isinstance(statsGame["save_pitcher"], str):
         message.append(f"\n\nSave: {statsGame['save_pitcher']}")
 
     return filename, message
