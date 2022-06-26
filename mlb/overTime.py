@@ -55,6 +55,15 @@ def getInningTimeStamps(pitching, homePitching=None, awayInningChanges=None):
     return outChanges, inningChanges, isWalkOff
 
 
+def specialPitchingPerformance(homePitching, awayPitching):
+    for df in (homePitching, awayPitching):
+        if df.iloc[-1]["hits"] == 0:
+            if df.iloc[-1]["obp"] == 0:
+                return "Perfect Game 💎! "
+            return "No-hitter 🏆! "
+    return ""
+
+
 def getFirstPitchTime(pitching):
     return pitching.loc[pitching["pitchesThrown"] >= 1].index[0]
 
@@ -116,6 +125,8 @@ def runsOverGame(
     homeOutChanges, homeInningChanges, isWalkOff = getInningTimeStamps(
         awayPitching, homePitching=homePitching, awayInningChanges=awayInningChanges
     )
+
+    starter = specialPitchingPerformance(awayPitching, homePitching)
 
     # parse startTime using pandas for consistency
     startTime = pd.DataFrame([{"startTime": statsGame["game_datetime"]}]).set_index(
@@ -349,9 +360,10 @@ def runsOverGame(
     losingScore = min(statsGame["away_score"], statsGame["home_score"])
 
     if isWalkOff:
-        starter = "Walk off 💥! "
-    else:
-        starter = ""
+        starter += "Walk off 💥! "
+
+    if winningScore - losingScore >= 10:
+        starter += "Blowout 🔨! "
 
     message = [
         f"{starter}{statsGame['winning_team']} ({winningScore}) > {statsGame['losing_team']} ({losingScore}){doubleHeader}",
@@ -360,6 +372,6 @@ def runsOverGame(
     ]
 
     if isinstance(statsGame["save_pitcher"], str):
-        message.append(f"\n\nSave: {statsGame['save_pitcher']}")
+        message.append(f"Save: {statsGame['save_pitcher']}")
 
     return filename, message

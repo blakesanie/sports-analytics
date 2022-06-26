@@ -34,7 +34,7 @@ if storedDate is not None and storedDate != todaysDate:
     print("it is a new day!")
     processedGames = []
 
-# todaysDate = "2022-06-01"
+# todaysDate = "2022-06-19"
 
 print("todaysDate", todaysDate)
 sched = pd.DataFrame(statsapi.schedule(date=todaysDate))
@@ -91,6 +91,8 @@ for game, pbp in gameData:
             legendLocation="best",
         )
     except Exception as e:
+        if not isinstance(e, IndexError):
+            raise e
         print("could not process game with exception", e)
         continue
     processedGames.append(str(game["game_id"]))
